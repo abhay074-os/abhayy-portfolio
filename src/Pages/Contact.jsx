@@ -1,195 +1,112 @@
-import React, { useState, useEffect } from "react";
-import { Share2, User, Mail, MessageSquare, Send } from "lucide-react";
-import SocialLinks from "../components/SocialLinks";
-import Komentar from "../components/Commentar";
-import Swal from "sweetalert2";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import axios from "axios";
+import React, { useState } from "react";
+import { supabase } from "../supabase";
+import { Send } from "lucide-react";
 
-const ContactPage = () => {
+export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    AOS.init({
-      once: false,
-    });
-  }, []);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
-    Swal.fire({
-      title: "Sending Message...",
-      html: "Please wait while your message is being sent.",
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
+    setLoading(true);
+    setSuccess(null);
+
+    const { error } = await supabase.from("contacts").insert([
+      {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
       },
-    });
+    ]);
 
-    try {
-      const formSubmitUrl =
-        "https://formsubmit.co/abhaypotdar@gmail.com";
-
-      const submitData = new FormData();
-      submitData.append("name", formData.name);
-      submitData.append("email", formData.email);
-      submitData.append("message", formData.message);
-      submitData.append("_subject", "New Message from Portfolio Website");
-      submitData.append("_captcha", "false");
-      submitData.append("_template", "table");
-
-      await axios.post(formSubmitUrl, submitData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      Swal.fire({
-        title: "Success!",
-        text: "Your message has been sent successfully!",
-        icon: "success",
-        confirmButtonColor: "#6366f1",
-        timer: 2000,
-        timerProgressBar: true,
-      });
-
-      setFormData({
-        name: "",
-        email: "",
-        message: "",
-      });
-    } catch (error) {
-      Swal.fire({
-        title: "Error!",
-        text: "Something went wrong. Please try again later.",
-        icon: "error",
-        confirmButtonColor: "#6366f1",
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (error) {
+      console.error(error);
+      setSuccess(false);
+    } else {
+      setSuccess(true);
+      setFormData({ name: "", email: "", message: "" });
     }
+
+    setLoading(false);
   };
 
   return (
-    <div className="px-[5%] sm:px-[5%] lg:px-[10%]">
-      <div className="text-center lg:mt-[5%] mt-10 mb-2 sm:px-0 px-[5%]">
-        <h2
-          data-aos="fade-down"
-          data-aos-duration="1000"
-          className="inline-block text-3xl md:text-5xl font-bold text-center mx-auto text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]"
-        >
+    <section className="w-full min-h-screen bg-[#030014] text-white px-[5%] lg:px-[10%] py-20">
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-4xl font-bold text-center mb-10 bg-gradient-to-r from-[#6366f1] to-[#a855f7] bg-clip-text text-transparent">
           Contact Me
         </h2>
-        <p
-          data-aos="fade-up"
-          data-aos-duration="1100"
-          className="text-slate-400 max-w-2xl mx-auto text-sm md:text-base mt-2"
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-xl space-y-6"
         >
-          Have a backend project, collaboration idea, or technical opportunity?
-          Send me a message and I’ll respond as soon as possible.
-        </p>
+          <input
+            type="text"
+            name="name"
+            placeholder="Your Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Your Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
+          />
+
+          <textarea
+            name="message"
+            placeholder="Your Message"
+            rows="5"
+            value={formData.message}
+            onChange={handleChange}
+            required
+            className="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none"
+          ></textarea>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#a855f7] hover:scale-105 transition-all duration-300 flex justify-center items-center gap-2"
+          >
+            <Send className="w-4 h-4" />
+            {loading ? "Sending..." : "Send Message"}
+          </button>
+
+          {success === true && (
+            <p className="text-green-400 text-center">
+              Message sent successfully!
+            </p>
+          )}
+
+          {success === false && (
+            <p className="text-red-400 text-center">
+              Something went wrong. Try again.
+            </p>
+          )}
+        </form>
       </div>
-
-      <div
-        className="h-auto py-10 flex items-center justify-center 2xl:pr-[3.1%] lg:pr-[3.8%] md:px-0"
-        id="Contact"
-      >
-        <div className="container px-[1%] grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-[45%_55%] 2xl:grid-cols-[35%_65%] gap-12">
-          {/* LEFT FORM */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-5 py-10 sm:p-10 transform transition-all duration-500 hover:shadow-[#6366f1]/10">
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h2 className="text-4xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
-                  Get In Touch
-                </h2>
-                <p className="text-gray-400">
-                  Let’s discuss backend systems, scalable architecture, or new opportunities.
-                </p>
-              </div>
-              <Share2 className="w-10 h-10 text-[#6366f1] opacity-50" />
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="relative group">
-                <User className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-[#6366f1] transition-colors" />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Your Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className="w-full p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 transition-all duration-300 hover:border-[#6366f1]/30 disabled:opacity-50"
-                  required
-                />
-              </div>
-
-              <div className="relative group">
-                <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-[#6366f1] transition-colors" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Your Email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className="w-full p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 transition-all duration-300 hover:border-[#6366f1]/30 disabled:opacity-50"
-                  required
-                />
-              </div>
-
-              <div className="relative group">
-                <MessageSquare className="absolute left-4 top-4 w-5 h-5 text-gray-400 group-focus-within:text-[#6366f1] transition-colors" />
-                <textarea
-                  name="message"
-                  placeholder="Your Message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  className="w-full resize-none p-4 pl-12 bg-white/10 rounded-xl border border-white/20 placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#6366f1]/30 transition-all duration-300 hover:border-[#6366f1]/30 h-[9.9rem] disabled:opacity-50"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#6366f1]/20 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                <Send className="w-5 h-5" />
-                {isSubmitting ? "Sending..." : "Send Message"}
-              </button>
-            </form>
-
-            <div className="mt-10 pt-6 border-t border-white/10 flex justify-center space-x-6">
-              <SocialLinks />
-            </div>
-          </div>
-
-          {/* RIGHT COMMENTS */}
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-3 py-3 md:p-10 md:py-8 shadow-2xl transform transition-all duration-500 hover:shadow-[#6366f1]/10">
-            <Komentar />
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
-};
-
-export default ContactPage;
+}
