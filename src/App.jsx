@@ -1,5 +1,7 @@
+
+
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import React, { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import "./index.css";
 import Navbar from "./components/Navbar";
@@ -33,7 +35,7 @@ const LandingPage = ({ showWelcome, setShowWelcome }) => {
       {!showWelcome && (
         <>
           <Navbar />
-      
+
           <Home />
           <About />
           <Suspense fallback={<div className="h-20" />}>
@@ -59,12 +61,13 @@ const ProjectPageLayout = () => (
 function App() {
   const [showWelcome, setShowWelcome] = useState(true);
 
+
   return (
-    
+
     <HelmetProvider>
       <div className="pointer-events-none">
-  <AnimatedBackground />
-</div>
+        <AnimatedBackground />
+      </div>
       <BrowserRouter>
         <Routes>
           {/* PUBLIC */}
