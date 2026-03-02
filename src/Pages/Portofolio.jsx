@@ -2,6 +2,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "../supabase";
 import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
+import AppBar from "@mui/material/AppBar";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import CardProject from "../components/CardProject";
 import TechStackIcon from "../components/TechStackIcon";
 import Certificate from "../components/Certificate";
@@ -25,6 +30,18 @@ const techStacks = [
   { icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg", language: "Vercel" }
 ];
 
+function TabPanel({ children, value, index }) {
+  return (
+    <div hidden={value !== index}>
+      {value === index && (
+        <Box sx={{ py: 4 }}>
+          <Typography component="div">{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
 export default function FullWidthTabs() {
   const theme = useTheme();
   const [value, setValue] = useState(0);
@@ -32,7 +49,7 @@ export default function FullWidthTabs() {
   const [certificates, setCertificates] = useState([]);
 
   useEffect(() => {
-    AOS.init({ once: false, duration: 800 });
+    AOS.init({ once: false });
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -41,6 +58,9 @@ export default function FullWidthTabs() {
         supabase.from("projects").select("*").order("id", { ascending: false }),
         supabase.from("certificates").select("*").order("id", { ascending: false }),
       ]);
+
+      if (projectsRes.error) throw projectsRes.error;
+      if (certRes.error) throw certRes.error;
 
       setProjects(projectsRes.data || []);
       setCertificates(certRes.data || []);
@@ -53,13 +73,17 @@ export default function FullWidthTabs() {
     fetchData();
   }, [fetchData]);
 
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <section
-      className="md:px-[10%] px-[5%] w-full mt-[3rem] bg-[#030014]"
-      id="Portofolio"
+      className="w-full bg-[#030014] py-16 px-4 md:px-16"
+      id="Portfolio"
     >
-      {/* Title */}
-      <div className="text-center pb-12" data-aos="fade-up">
+      {/* TITLE */}
+      <div className="text-center mb-12" data-aos="fade-up">
         <h2 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
           Portfolio Showcase
         </h2>
@@ -68,92 +92,90 @@ export default function FullWidthTabs() {
         </p>
       </div>
 
-      {/* Glass Tab UI */}
-      <div className="flex justify-center mb-14">
-        <div className="flex bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-lg">
-
-          <button
-            onClick={() => setValue(0)}
-            className={`px-8 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 font-medium
-              ${value === 0
-                ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white shadow-lg scale-105"
-                : "text-slate-300 hover:text-white"
-              }`}
+      {/* TABS CONTAINER */}
+      <Box sx={{ maxWidth: 900, mx: "auto" }}>
+        <AppBar
+          position="static"
+          elevation={0}
+          sx={{
+            bgcolor: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "20px",
+            backdropFilter: "blur(15px)",
+            overflow: "hidden"
+          }}
+        >
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            variant="fullWidth"
+            TabIndicatorProps={{
+              style: {
+                background: "linear-gradient(90deg,#6366f1,#a855f7)",
+                height: 4,
+                borderRadius: 4,
+              },
+            }}
+            sx={{
+              "& .MuiTab-root": {
+                fontWeight: 600,
+                textTransform: "none",
+                color: "#94a3b8",
+                minHeight: 60,
+                fontSize: { xs: "12px", sm: "15px" },
+                transition: "all 0.3s ease",
+              },
+              "& .Mui-selected": {
+                color: "#ffffff",
+              },
+            }}
           >
-            <Code className="w-4 h-4" />
-            Projects
-          </button>
+            <Tab icon={<Code size={18} />} iconPosition="start" label="Projects" />
+            <Tab icon={<Award size={18} />} iconPosition="start" label="Certificates" />
+            <Tab icon={<Boxes size={18} />} iconPosition="start" label="Tech Stack" />
+          </Tabs>
+        </AppBar>
 
-          <button
-            onClick={() => setValue(1)}
-            className={`px-8 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 font-medium
-              ${value === 1
-                ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white shadow-lg scale-105"
-                : "text-slate-300 hover:text-white"
-              }`}
-          >
-            <Award className="w-4 h-4" />
-            Certificates
-          </button>
+        {/* TAB CONTENT */}
+        <SwipeableViews
+          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+          index={value}
+          onChangeIndex={setValue}
+        >
+          <TabPanel value={value} index={0}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project, index) => (
+                <div key={project.id || index} data-aos="fade-up">
+                  <CardProject {...project} />
+                </div>
+              ))}
+            </div>
+          </TabPanel>
 
-          <button
-            onClick={() => setValue(2)}
-            className={`px-8 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 font-medium
-              ${value === 2
-                ? "bg-gradient-to-r from-[#6366f1] to-[#a855f7] text-white shadow-lg scale-105"
-                : "text-slate-300 hover:text-white"
-              }`}
-          >
-            <Boxes className="w-4 h-4" />
-            Tech Stack
-          </button>
+          <TabPanel value={value} index={1}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {certificates.map((certificate, index) => (
+                <div key={certificate.id || index} data-aos="fade-up">
+                  <Certificate ImgSertif={certificate.Img} />
+                </div>
+              ))}
+            </div>
+          </TabPanel>
 
-        </div>
-      </div>
-
-      {/* Swipe Animation */}
-      <SwipeableViews
-        axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-        index={value}
-        onChangeIndex={setValue}
-      >
-        {/* Projects */}
-        <div hidden={value !== 0}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project, index) => (
-              <div key={project.id || index} data-aos="fade-up">
-                <CardProject {...project} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Certificates */}
-        <div hidden={value !== 1}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {certificates.map((certificate, index) => (
-              <div key={certificate.id || index} data-aos="fade-up">
-                <Certificate ImgSertif={certificate.Img} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tech Stack */}
-        <div hidden={value !== 2}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {techStacks.map((stack, index) => (
-              <div key={index} data-aos="fade-up">
-                <TechStackIcon
-                  TechStackIcon={stack.icon}
-                  Language={stack.language}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </SwipeableViews>
+          <TabPanel value={value} index={2}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {techStacks.map((stack, index) => (
+                <div key={index} data-aos="fade-up">
+                  <TechStackIcon
+                    TechStackIcon={stack.icon}
+                    Language={stack.language}
+                  />
+                </div>
+              ))}
+            </div>
+          </TabPanel>
+        </SwipeableViews>
+      </Box>
     </section>
   );
 }
