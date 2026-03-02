@@ -79,10 +79,10 @@ export default function FullWidthTabs() {
 
   return (
     <section
-      className="w-full bg-[#030014] py-16 px-4 md:px-16"
+
+      className="w-full min-h-screen bg-[#030014] py-16 px-4 md:px-16"
       id="Portfolio"
     >
-      {/* TITLE */}
       <div className="text-center mb-12" data-aos="fade-up">
         <h2 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#6366f1] to-[#a855f7]">
           Portfolio Showcase
@@ -92,7 +92,6 @@ export default function FullWidthTabs() {
         </p>
       </div>
 
-      {/* TABS CONTAINER */}
       <Box sx={{ maxWidth: 900, mx: "auto" }}>
         <AppBar
           position="static"
@@ -136,7 +135,6 @@ export default function FullWidthTabs() {
           </Tabs>
         </AppBar>
 
-        {/* TAB CONTENT */}
         <SwipeableViews
           axis={theme.direction === "rtl" ? "x-reverse" : "x"}
           index={value}
