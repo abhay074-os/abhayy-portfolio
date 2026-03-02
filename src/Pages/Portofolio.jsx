@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "../supabase";
 import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import AppBar from "@mui/material/AppBar";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -44,13 +45,19 @@ function TabPanel({ children, value, index }) {
 
 export default function FullWidthTabs() {
   const theme = useTheme();
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   const [value, setValue] = useState(0);
   const [projects, setProjects] = useState([]);
   const [certificates, setCertificates] = useState([]);
 
+  // ✅ AOS optimized only for mobile
   useEffect(() => {
-    AOS.init({ once: false });
-  }, []);
+    AOS.init({
+      once: true,
+      disable: isMobile, // disable animations on mobile
+    });
+  }, [isMobile]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -92,7 +99,6 @@ export default function FullWidthTabs() {
         </p>
       </div>
 
-      {/* TABS CONTAINER */}
       <Box sx={{ maxWidth: 900, mx: "auto" }}>
         <AppBar
           position="static"
@@ -101,7 +107,7 @@ export default function FullWidthTabs() {
             bgcolor: "rgba(255,255,255,0.03)",
             border: "1px solid rgba(255,255,255,0.1)",
             borderRadius: "20px",
-            backdropFilter: "blur(15px)",
+            backdropFilter: isMobile ? "none" : "blur(15px)", // blur removed on mobile
             overflow: "hidden"
           }}
         >
@@ -136,45 +142,89 @@ export default function FullWidthTabs() {
           </Tabs>
         </AppBar>
 
-        {/* TAB CONTENT */}
-        <SwipeableViews
-          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-          index={value}
-          onChangeIndex={setValue}
-        >
-          <TabPanel value={value} index={0}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project, index) => (
-                <div key={project.id || index} data-aos="fade-up">
-                  <CardProject {...project} />
+        {/* ✅ Mobile: No SwipeableViews */}
+        {isMobile ? (
+          <>
+            {value === 0 && (
+              <TabPanel value={value} index={0}>
+                <div className="grid grid-cols-1 gap-6">
+                  {projects.map((project, index) => (
+                    <div key={project.id || index}>
+                      <CardProject {...project} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </TabPanel>
+              </TabPanel>
+            )}
 
-          <TabPanel value={value} index={1}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {certificates.map((certificate, index) => (
-                <div key={certificate.id || index} data-aos="fade-up">
-                  <Certificate ImgSertif={certificate.Img} />
+            {value === 1 && (
+              <TabPanel value={value} index={1}>
+                <div className="grid grid-cols-1 gap-6">
+                  {certificates.map((certificate, index) => (
+                    <div key={certificate.id || index}>
+                      <Certificate ImgSertif={certificate.Img} />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </TabPanel>
+              </TabPanel>
+            )}
 
-          <TabPanel value={value} index={2}>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {techStacks.map((stack, index) => (
-                <div key={index} data-aos="fade-up">
-                  <TechStackIcon
-                    TechStackIcon={stack.icon}
-                    Language={stack.language}
-                  />
+            {value === 2 && (
+              <TabPanel value={value} index={2}>
+                <div className="grid grid-cols-2 gap-6">
+                  {techStacks.map((stack, index) => (
+                    <div key={index}>
+                      <TechStackIcon
+                        TechStackIcon={stack.icon}
+                        Language={stack.language}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </TabPanel>
-        </SwipeableViews>
+              </TabPanel>
+            )}
+          </>
+        ) : (
+          /* ✅ Desktop: Original behavior untouched */
+          <SwipeableViews
+            axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+            index={value}
+            onChangeIndex={setValue}
+          >
+            <TabPanel value={value} index={0}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.map((project, index) => (
+                  <div key={project.id || index} data-aos="fade-up">
+                    <CardProject {...project} />
+                  </div>
+                ))}
+              </div>
+            </TabPanel>
+
+            <TabPanel value={value} index={1}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {certificates.map((certificate, index) => (
+                  <div key={certificate.id || index} data-aos="fade-up">
+                    <Certificate ImgSertif={certificate.Img} />
+                  </div>
+                ))}
+              </div>
+            </TabPanel>
+
+            <TabPanel value={value} index={2}>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                {techStacks.map((stack, index) => (
+                  <div key={index} data-aos="fade-up">
+                    <TechStackIcon
+                      TechStackIcon={stack.icon}
+                      Language={stack.language}
+                    />
+                  </div>
+                ))}
+              </div>
+            </TabPanel>
+          </SwipeableViews>
+        )}
       </Box>
     </section>
   );
