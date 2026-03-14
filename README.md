@@ -15,7 +15,7 @@ This portfolio project is built using **React + Supabase**, featuring:
 
 ## 🌐 Live Demo
 
-👉 *Add your live link here (Vercel/Netlify)*
+👉https://abhayy-portfolio.vercel.app/
 
 ---
 
