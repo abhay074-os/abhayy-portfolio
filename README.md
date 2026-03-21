@@ -258,6 +258,7 @@ Backend-focused developer skilled in:
 * React & Supabase
 * Secure database architecture
 * AI-integrated backend systems
+* AI- Engineer
 
 I build systems that are scalable, clean, and production-ready.
 
@@ -267,7 +268,8 @@ I build systems that are scalable, clean, and production-ready.
 
 **Abhay Potdar**
 GitHub: [https://github.com/abhay074-os](https://github.com/abhay074-os)
-LinkedIn: [https://www.linkedin.com/in/abhayy-potdar/](https://www.linkedin.com/in/abhayy-potdar/)
+LinkedIn: [https://www.linkedin.com/in/abhayy-potdar/(https://www.linkedin.com/in/abhayy-potdar/)
+
  
 
  
